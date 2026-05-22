@@ -1,0 +1,92 @@
+[
+  {
+    "title": "专业级产品场景图-室内极简风",
+    "content": "[产品名称], high-end product photography, minimalist studio setting, soft natural sunlight from a window, beige limestone background, hyper-realistic, 8k resolution, commercial aesthetic.",
+    "category": "图像-生图",
+    "likes": 0
+  },
+  {
+    "title": "专业级产品场景图-户外生活化",
+    "content": "[产品名称], lifestyle photography, placed on a modern patio table, garden background with soft bokeh, warm golden hour lighting, cinematic feel, sharp focus on product.",
+    "category": "图像-生图",
+    "likes": 0
+  },
+  {
+    "title": "专业级产品场景图-商务硬朗风",
+    "content": "[产品名称], professional studio lighting, dark grey concrete background, dramatic shadows, industrial style, ultra-detailed textures, advertisement quality.",
+    "category": "图像-生图",
+    "likes": 0
+  },
+  {
+    "title": "基础纯白底",
+    "content": "A front view of [Product Name], centered, isolated on a pure white background (Hex #FFFFFF), studio lighting, high resolution, 8k, highly detailed textures, no shadows, commercial photography style.",
+    "category": "图像-修图",
+    "likes": 0
+  },
+  {
+    "title": "3C数码/科技感（冷光、极致清晰）",
+    "content": "Professional product photography of [Product Name], front eye-level view, pure white background, sharp focus, macro details, neutral bright lighting, clean lines, minimalist aesthetic, hyper-realistic.",
+    "category": "图像-修图",
+    "likes": 0
+  },
+  {
+    "title": "瓶装/透明材质（玻璃、化妆品）",
+    "content": "Front shot of [Product Name], pure white background, backlight to define glass edges, crisp reflections, luxury cosmetics photography, studio setting, symmetrical composition, 8k.",
+    "category": "图像-修图",
+    "likes": 0
+  },
+  {
+    "title": "基础单色替换",
+    "content": "Modify the color of this [Product Name] from [Original Color] to [Target Color]. Keep the shape, texture, and lighting consistent with the original image. High-quality render.",
+    "category": "图像-修图",
+    "likes": 0
+  },
+  {
+    "title": "金属/电镀质感换色（保留光泽）",
+    "content": "Re-render the metallic parts of this [Product] in [Target Finish, e.g., Brushed Gold / Rose Copper]. Maintain the original metallic reflections, highlights, and surface sheen. Professional studio look",
+    "category": "图像-修图",
+    "likes": 0
+  },
+  {
+    "title": "局部精准换色",
+    "content": "Keep the main body of the [Product] in [Color A], but change only the [Specific Part, e.g., Handle/Logo/Button] to [Color B]. Ensure a seamless transition and realistic appearance.",
+    "category": "图像-修图",
+    "likes": 0
+  },
+  {
+    "title": "目标客户全维度扫描（背调神器）",
+    "content": "请深度调研 [公司名称/网址]。请提供：\r\n基本面： 公司规模、总部地点、主要分销渠道。\r\n供应链分析： 查找其公开的供应商信息或海关进出口记录（最近1年）。\r\n核心买手/高管： 识别 Purchasing Manager 或 Buyer 的姓名及 LinkedIn 链接。\r\n痛点挖掘： 搜索近期关于该公司的客户评价（Google Review/Reddit），找出他们对现有产品的不满点。",
+    "category": "调研",
+    "likes": 0
+  },
+  {
+    "title": "行业趋势与竞品动态（选品必备）",
+    "content": "调研 [产品类别，如：户外储能电源] 在 [目标市场，如：德国] 的市场现状。请列出：\r\nTop 5 品牌： 该市场目前最畅销的品牌及其核心卖点。\r\n消费者偏好： 当地买家最看重的参数（如：容量、重量、快充）。\r\n竞争对手定价： 给出主流型号的平均零售价区间。\r\n最新标准： 该产品近期在当地是否有新的环保或准入限制（如：CE/RoHS新规）。",
+    "category": "调研",
+    "likes": 0
+  },
+  {
+    "title": "海关数据与贸易流向分析",
+    "content": "搜索并整理 [产品，如：陶瓷餐具] 从中国出口到 [国家] 的贸易数据。\r\n识别过去6个月内最活跃的 [国家] 进口商名单。\r\n分析这些进口商的采购周期（是季节性采购还是全年采购）。\r\n找出这些进口商通常合作的中国竞争对手厂家（如有公开信息）。",
+    "category": "调研",
+    "likes": 0
+  },
+  {
+    "title": "展会与渠道商列表挖掘",
+    "content": "请列出 [年份] 全球范围内最值得参加的 [行业，如：宠物用品] 展会，按时间顺序排列。\r\n另外，请搜索并列出在 [目标国家] 专门从事该类目批发的 Top 10 经销商/代理商 及其联系方式（官网及领英）",
+    "category": "调研",
+    "likes": 0
+  },
+  {
+    "title": "内容营销（独立站/社媒）",
+    "content": "我有一款产品 [产品名称]，参数如下：[粘贴参数列表]。\r\n请帮我把这些枯燥的参数转化成针对 [目标人群，如：分销商/终端用户] 的营销短语。\r\n[要求]：采用 ‘特点 + 利益（Feature to Benefit）’ 的模式。例如：不要只说‘防水等级IP67’，要说‘即便在极端雨天也能稳定运行，减少您的售后返修成本’。",
+    "category": "通用",
+    "likes": 0
+  },
+  {
+    "title": "商务邮件一键“地道化”",
+    "content": "请帮我润色以下这段外贸商务邮件。\r\n[原文内容]：[粘贴业务员写的草稿]。\r\n[目标风格]：请将其修改为更符合 [国家，如：美国] 商务习惯的口吻。\r\n[要求]：修正语法错误，使用更地道的行业术语，让语气听起来既礼貌又高效。",
+    "category": "通用",
+    "likes": 0
+  }
+]

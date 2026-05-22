@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>提示词库 · Prompt Hub</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>"/>
+<style>
+:root {
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --text: #0f172a;
+  --sub: #64748b;
+  --muted: #94a3b8;
+  --border: #e8ecf2;
+  --primary: #4f6ef7;
+  --primary-light: #eef2ff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ===== 顶部导航栏（抄8888） ===== */
+.top-bar {
+  background: rgba(255,255,255,0.92);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  isolation: isolate;
+}
+.top-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.brand img { height: 36px; width: auto; }
+.brand-text h1 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.2;
+}
+.brand-text p {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* 顶栏内搜索（居中） */
+.top-search {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 320px;
+  width: 100%;
+}
+.top-search input {
+  width: 100%;
+  padding: 7px 12px 7px 34px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  transition: border 0.15s, box-shadow 0.15s;
+}
+.top-search input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,110,247,0.1); }
+.top-search input::placeholder { color: var(--muted); }
+.top-search .s-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+.info-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  transition: background 0.2s;
+  cursor: default;
+}
+.stat-chip:hover { background: var(--primary-light); }
+.stat-chip .sc-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1;
+}
+.stat-chip .sc-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+  margin: 0 8px;
+}
+.btn-add {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #4f6ef7, #818cf8);
+  border-radius: 10px;
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-add:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,110,247,0.3); }
+.btn-add.amber { background: linear-gradient(135deg, #f59e0b, #fb923c); }
+.btn-add.amber:hover { box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+
+/* ===== 内容区间距 ===== */
+.container { padding-top: 16px; }
+
+/* ===== 内容区 ===== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px 60px;
+}
+
+/* ===== 筛选栏：标签 + 排序同行 ===== */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.sort-wrap {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sort-wrap label { font-size: 12px; color: var(--sub); }
+.sort-wrap select {
+  padding: 7px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ===== 分类标签（8888风格） ===== */
+.cat-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.cat-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sub);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.cat-tab:hover {
+  border-color: #c7d2fe;
+  color: var(--text);
+  background: var(--primary-light);
+}
+.cat-tab.active {
+  background: linear-gradient(135deg, #4f6ef7, #818cf8);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(79,110,247,0.25);
+}
+.cat-tab .cat-count {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.06);
+  font-weight: 600;
+}
+.cat-tab.active .cat-count {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+}
+
+/* ===== 分组标题（8888风格） ===== */
+.group-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sub);
+  margin: 32px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.group-title::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #4f6ef7, #818cf8);
+  display: inline-block;
+}
+
+/* ===== 卡片网格 ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ===== 卡片（抄8888） ===== */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 22px;
+  border: 1px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+.card:hover::before { opacity: 1; }
+
+/* 卡片顶色条 */
+.card.t-image-gen::before { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+.card.t-image-edit::before { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+.card.t-research::before { background: linear-gradient(90deg, #10b981, #34d399); }
+.card.t-general::before { background: linear-gradient(90deg, #4f6ef7, #818cf8); }
+.card.t-email::before { background: linear-gradient(90deg, #f59e0b, #fb923c); }
+.card.t-demand::before { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+.card:hover.t-image-gen { border-color: #c7d2fe; }
+.card:hover.t-image-edit { border-color: #a5f3fc; }
+.card:hover.t-research { border-color: #a7f3d0; }
+.card:hover.t-general { border-color: #c7d2fe; }
+.card:hover.t-email { border-color: #fed7aa; }
+.card:hover.t-demand { border-color: #fca5a5; }
+
+/* 卡片头部 */
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+.card:hover .card-icon { transform: scale(1.08); }
+.card.t-image-gen .card-icon { background: #eef2ff; }
+.card.t-image-edit .card-icon { background: #ecfeff; }
+.card.t-research .card-icon { background: #ecfdf5; }
+.card.t-general .card-icon { background: #eef2ff; }
+.card.t-email .card-icon { background: #fffbeb; }
+.card.t-demand .card-icon { background: #fef2f2; }
+
+.card-title-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+/* 灯泡效果 */
+.card-bulb {
+  font-size: 20px;
+  opacity: 0.2;
+  filter: grayscale(1);
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  line-height: 1;
+}
+.card:hover .card-bulb {
+  opacity: 1;
+  filter: grayscale(0) drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+  animation: bulbGlow 0.6s ease;
+}
+@keyframes bulbGlow {
+  0% { filter: grayscale(1) drop-shadow(0 0 0 transparent); opacity: 0.2; }
+  50% { filter: grayscale(0) drop-shadow(0 0 14px rgba(251, 191, 36, 0.9)); opacity: 1; transform: scale(1.15); }
+  100% { filter: grayscale(0) drop-shadow(0 0 8px rgba(251, 191, 36, 0.6)); opacity: 1; transform: scale(1); }
+}
+
+/* 卡片内容 */
+.card-content {
+  font-size: 12px;
+  color: var(--sub);
+  line-height: 1.6;
+  padding-left: 62px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-content.expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+.expand-link {
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  padding-left: 62px;
+  user-select: none;
+}
+.expand-link:hover { text-decoration: underline; }
+
+/* 卡片底部操作 */
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 0;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  margin-left: 0;
+}
+.card-date {
+  font-size: 11px;
+  color: var(--muted);
+  flex: 1;
+}
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--sub);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.card-btn:hover { background: var(--bg); color: var(--text); border-color: #cbd5e1; }
+.card-btn.btn-copy:hover { border-color: #86efac; color: var(--green); }
+.card-btn.btn-copy.copied { border-color: #86efac; color: var(--green); background: #f0fdf4; }
+.card-btn.btn-like:hover { border-color: #93c5fd; color: var(--primary); }
+.card-btn.btn-like.liked { border-color: #93c5fd; color: var(--primary); background: #eff6ff; }
+.card-btn.btn-edit:hover { border-color: #c4b5fd; color: #8b5cf6; }
+.card-btn.btn-del:hover { border-color: #fca5a5; color: var(--red); }
+
+/* ===== 需求箱 ===== */
+.demand {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-top: 32px;
+}
+.demand-h {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.demand-h:hover { background: #fffbeb; }
+.demand-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.demand-badge {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 10px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.demand-tog {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.3s;
+}
+.demand-tog.open { transform: rotate(180deg); }
+.demand-b { padding: 0 22px 22px; }
+.demand-b.collapsed { display: none; }
+.demand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.demand-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.demand-card:hover { border-color: #fed7aa; }
+.demand-rank {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rank-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.rank-num.top3 { background: var(--amber); color: #fff; }
+.rank-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow:ellipsis;
+}
+.rank-content {
+  font-size: 12px;
+  color: var(--sub);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.rank-vote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--amber);
+  font-weight: 700;
+  margin-top: 2px;
+}
+.btn-vote {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  transition: transform 0.2s;
+}
+.btn-vote:hover { transform: scale(1.2); }
+.demand-pager {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.demand-pager button {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--sub);
+  transition: all 0.15s;
+}
+.demand-pager button:hover { background: var(--border); color: var(--text); }
+.demand-pager button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* ===== 分页 ===== */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 0 0;
+}
+.pg-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--sub);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pg-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pg-info { font-size: 13px; color: var(--muted); }
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.modal-overlay.show { opacity: 1; visibility: visible; }
+.modal {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow: hidden;
+  transform: translateY(20px);
+  transition: transform 0.2s;
+}
+.modal-overlay.show .modal { transform: translateY(0); }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #fff;
+}
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-close {
+  background: transparent; border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 20px; cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.modal-close:hover { color: #fff; }
+.modal-body { padding: 22px; overflow-y: auto; max-height: calc(85vh - 64px); }
+
+/* Form */
+.m-form { display: flex; flex-direction: column; gap: 16px; }
+.m-label { font-size: 13px; font-weight: 600; color: var(--sub); margin-bottom: 6px; display: block; }
+.m-input, .m-select, .m-textarea {
+  width: 100%; padding: 10px 14px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text); font-size: 14px; font-family: inherit;
+  transition: border 0.15s;
+}
+.m-input:focus, .m-select:focus, .m-textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
+.m-input::placeholder, .m-textarea::placeholder { color: var(--muted); }
+.m-textarea { resize: vertical; min-height: 100px; }
+.m-btn-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.m-btn {
+  padding: 10px 20px;
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  color: #fff;
+}
+.m-btn.primary { background: linear-gradient(135deg, #4f6ef7, #818cf8); }
+.m-btn.primary:hover { box-shadow: 0 4px 12px rgba(79,110,247,0.3); }
+.m-btn.amber { background: linear-gradient(135deg, #f59e0b, #fb923c); }
+.m-btn.amber:hover { box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+.m-btn.gray { background: #64748b; }
+.m-btn.gray:hover { background: #475569; }
+.m-btn.danger { background: var(--red); }
+.m-btn.danger:hover { background: #dc2626; }
+.m-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Empty & Loading */
+.empty { text-align: center; padding: 60px 20px; color: var(--sub); }
+.empty .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty p { font-size: 15px; }
+.loading { text-align: center; padding: 40px; color: var(--sub); font-size: 14px; }
+
+/* Toast */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: 12px 20px;
+  border-radius: 12px; font-size: 14px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.2s; z-index: 9999;
+  pointer-events: none; max-width: 300px;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.toast-success { border-color: #86efac; }
+#toast.toast-error { border-color: #fca5a5; }
+#toast.toast-warn { border-color: #fde68a; }
+
+/* Help */
+.help-icon {
+  width: 28px; height: 28px;
+  background: var(--primary-light);
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--primary); cursor: pointer;
+  transition: all 0.15s; flex-shrink: 0; user-select: none; border: none;
+}
+.help-icon:hover { background: var(--primary); color: #fff; }
+.help-content { font-size: 14px; line-height: 1.8; color: var(--text); }
+.help-content h3 { font-size: 15px; color: var(--primary); margin: 20px 0 8px; font-weight: 700; }
+.help-content h3:first-child { margin-top: 0; }
+.help-content p { margin: 6px 0; }
+.help-content ul { margin: 6px 0; padding-left: 20px; }
+.help-content li { margin: 4px 0; }
+.help-content .tip-bad { color: var(--red); font-weight: 700; }
+.help-content .tip-good { color: var(--green); font-weight: 700; }
+.help-content .section { background: var(--bg); border-radius: 12px; padding: 16px; margin: 10px 0; }
+.help-content code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+/* ===== fadeUp 动画 ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+
+/* ===== Footer ===== */
+.footer { text-align: center; padding: 20px 32px 32px; font-size: 12px; color: var(--muted); }
+
+/* ===== 响应式 ===== */
+@media (max-width: 900px) {
+  .top-inner { padding: 0; }
+  .container { padding: 0 20px 40px; }
+  .top-bar { padding: 0 16px; }
+  .top-search { max-width: 200px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
+@media (max-width: 600px) {
+  .top-bar { padding: 0 10px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .top-inner { height: auto; padding: 10px 0; flex-wrap: wrap; justify-content: flex-start; }
+  .brand { flex-shrink: 0; gap: 8px; }
+  .brand img { height: 34px; width: auto; }
+  .brand-text h1 { font-size: 15px; }
+  .brand-text p { display: none; }
+  .top-search { position: static; transform: none; left: auto; order: 3; max-width: 100%; margin: 8px 0 0; flex-basis: 100%; }
+  .info-bar { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+  .stat-chip { padding: 4px 8px; }
+  .stat-chip .sc-val { font-size: 13px; }
+  .stat-chip .sc-label { display: none; }
+  .divider { margin: 0 4px; height: 24px; }
+  .btn-add { padding: 6px 10px; font-size: 12px; }
+  .container { padding: 0 12px 30px; padding-top: 12px; }
+  .filter-bar { flex-direction: column; align-items: flex-start; }
+  .cat-tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .card { padding: 14px !important; border-radius: 12px !important; }
+  .card::before { display: none; }
+  .card:hover { transform: none !important; box-shadow: var(--shadow-sm) !important; }
+  .card:hover.t-image-gen, .card:hover.t-image-edit, .card:hover.t-research,
+  .card:hover.t-general, .card:hover.t-email, .card:hover.t-demand { border-color: var(--border); }
+  .card-top { gap: 10px; margin-bottom: 6px; }
+  .card-icon { width: 36px !important; height: 36px !important; font-size: 16px !important; border-radius: 10px !important; }
+  .card:hover .card-icon { transform: none !important; }
+  .card-name { font-size: 13px !important; }
+  .card-bulb { display: none !important; }
+  .card-content { font-size: 11px !important; padding-left: 46px !important; -webkit-line-clamp: 2; }
+  .expand-link { padding-left: 46px; }
+  .card-footer { margin-left: 0; }
+  .cat-tab { padding: 6px 10px; font-size: 12px; flex-shrink: 0; }
+  .group-title { font-size: 13px !important; margin: 20px 0 12px !important; }
+  .group-title::before { width: 3px; height: 14px; }
+  .demand-grid { grid-template-columns: 1fr !important; }
+  .footer { padding: 16px 12px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 顶部导航栏 -->
+<div class="top-bar">
+  <div class="top-inner">
+    <div class="brand">
+      <img src="static/LOGO.png" alt="Logo" onerror="this.style.display='none'"/>
+      <div class="brand-text">
+        <h1>提示词库</h1>
+        <p id="hero-date">--</p>
+      </div>
+    </div>
+    <div class="top-search">
+      <span class="s-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜索提示词…"/>
+    </div>
+    <div class="info-bar">
+      <span class="search-count" id="tb-count" style="font-size:12px;color:var(--muted);white-space:nowrap">0 条</span>
+      <div class="stat-chip">
+        <span class="sc-label">点赞</span>
+        <span class="sc-val" id="hd-likes">--</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-chip">
+        <span class="sc-label">需求</span>
+        <span class="sc-val" id="hd-demands">--</span>
+      </div>
+      <div class="divider"></div>
+      <button class="help-icon" onclick="showHelp()" title="使用帮助">?</button>
+      <div class="divider"></div>
+      <button class="btn-add" id="btnAddPrompt">✏️ 添加</button>
+      <button class="btn-add amber" id="btnAddDemand">💡 需求</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- 内容 -->
+<div class="container">
+  <!-- 筛选栏：分类标签 + 排序 -->
+  <div class="filter-bar">
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="sort-wrap">
+      <label>排序:</label>
+      <select id="sortSelect">
+        <option value="date">按日期</option>
+        <option value="likes">按点赞</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 卡片网格 -->
+  <div class="grid" id="promptGrid"><div class="loading">加载中…</div></div>
+  <div class="pagination" id="pagination"></div>
+
+  <!-- 需求箱 -->
+  <div class="demand">
+    <div class="demand-h" id="demandToggleBtn">
+      <div class="demand-title">📬 需求箱 · TOP 需求</div>
+      <span class="demand-badge" id="demandBadge">0 条</span>
+      <span class="demand-tog" id="demandTogIcon">▼</span>
+    </div>
+    <div class="demand-b collapsed" id="demandBody">
+      <div class="demand-grid" id="demandRow"><div class="loading">加载中…</div></div>
+      <div class="demand-pager" id="demandPager"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">© 2026 Prompt Hub · 持续更新中</div>
+
+<!-- 添加提示词 Modal -->
+<div class="modal-overlay" id="modalAddPrompt">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">✏️ 添加新提示词</span>
+      <button class="modal-close" onclick="closeModal('modalAddPrompt')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form class="m-form" id="addPromptForm">
+        <div><label class="m-label">标题</label><input class="m-input" type="text" id="fp-title" placeholder="简短描述用途（不超过60字）" required maxlength="60"/></div>
+        <div><label class="m-label">分类</label>
+          <select class="m-select" id="fp-cat">
+            <option value="图像-生图">🎨 图像-生图</option>
+            <option value="图像-修图">✏️ 图像-修图</option>
+            <option value="调研">🔍 调研</option>
+            <option value="通用" selected>⚡ 通用</option>
+            <option value="开发信">📧 开发信</option>
+          </select>
+        </div>
+        <div><label class="m-label">提示词内容</label><textarea class="m-textarea" id="fp-content" placeholder="粘贴或输入完整提示词内容…" required></textarea></div>
+        <div class="m-btn-row">
+          <button type="button" class="m-btn gray" onclick="closeModal('modalAddPrompt')">取消</button>
+          <button type="submit" class="m-btn primary" id="btnSubmitPrompt">提交</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 添加需求 Modal -->
+<div class="modal-overlay" id="modalAddDemand">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">💡 提交新需求</span>
+      <button class="modal-close" onclick="closeModal('modalAddDemand')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form class="m-form" id="addDemandForm">
+        <div><label class="m-label">需求标题</label><input class="m-input" type="text" id="fd-title" placeholder="一句话描述需求（不超过60字）" required maxlength="60"/></div>
+        <div><label class="m-label">详细描述</label><textarea class="m-textarea" id="fd-content" placeholder="详细描述您的需求…" required></textarea></div>
+        <div class="m-btn-row">
+          <button type="button" class="m-btn gray" onclick="closeModal('modalAddDemand')">取消</button>
+          <button type="submit" class="m-btn amber" id="btnSubmitDemand">提交需求</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 编辑 Modal -->
+<div class="modal-overlay" id="modalEdit">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📝 编辑提示词</span>
+      <button class="modal-close" onclick="closeModal('modalEdit')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form class="m-form" id="editForm">
+        <input type="hidden" id="edit-id"/>
+        <div><label class="m-label">标题</label><input class="m-input" type="text" id="edit-title" placeholder="简短描述用途（不超过60字）" required maxlength="60"/></div>
+        <div><label class="m-label">分类</label>
+          <select class="m-select" id="edit-cat">
+            <option value="图像-生图">🎨 图像-生图</option>
+            <option value="图像-修图">✏️ 图像-修图</option>
+            <option value="调研">🔍 调研</option>
+            <option value="通用">⚡ 通用</option>
+            <option value="开发信">📧 开发信</option>
+            <option value="需求">💡 需求</option>
+          </select>
+        </div>
+        <div><label class="m-label">提示词内容</label><textarea class="m-textarea" id="edit-content" placeholder="粘贴或输入完整提示词内容…" required></textarea></div>
+        <div><label class="m-label">管理密码</label><input class="m-input" type="password" id="edit-password" placeholder="请输入密码" required/></div>
+        <div class="m-btn-row">
+          <button type="button" class="m-btn gray" onclick="closeModal('modalEdit')">取消</button>
+          <button type="submit" class="m-btn primary">保存修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认 Modal -->
+<div class="modal-overlay" id="modalDel">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#f97316)">
+      <span class="modal-title">🗑️ 确认删除</span>
+      <button class="modal-close" onclick="closeModal('modalDel')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="text-align:center;margin-bottom:16px;color:var(--sub)">确定要删除这条提示词吗？此操作不可恢复。</p>
+      <div><label class="m-label">管理密码</label><input class="m-input" type="password" id="del-password" placeholder="请输入管理员密码"/></div>
+      <div class="m-btn-row">
+        <button type="button" class="m-btn gray" onclick="closeModal('modalDel')">取消</button>
+        <button type="button" class="m-btn danger" id="btnConfirmDel">确认删除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal-overlay" id="modalHelp">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <span class="modal-title">❓ 使用帮助</span>
+      <button class="modal-close" onclick="closeModal('modalHelp')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="help-content">
+        <div class="section">本库中的提示词（Prompt）已针对外贸实战优化。<strong>ChatGPT/Gemini/豆包/千问</strong> 偏重文案与改图，<strong>Perplexity</strong> 偏重搜资料，请按需选择。</div>
+        <h3>1. 核心公式：复制 + 填空</h3>
+        <p>所有的提示词都遵循一个简单的逻辑：</p>
+        <p><strong>[库内模板] + 你的具体信息 = 专业结果</strong></p>
+        <p>操作指引：看到提示词中的 <strong>[ ]</strong>，请将其替换为具体的产品名、颜色、公司名或要求。❗ 不要保留括号。</p>
+        <h3>2. 三大场景工具选择</h3>
+        <ul>
+          <li><strong>文案/改图</strong>（豆包、通义千问、南瓜脑）：适合写开发信、修改产品图片颜色、背景去重、回复客诉。</li>
+          <li><strong>深度调研</strong>（Perplexity）：适合查客户背景、挖买手信息、分析海关数据、追踪行业趋势。</li>
+          <li><strong>绘图</strong>（Midjourney/南瓜脑）：适合生成高大上的产品场景宣传图。</li>
+        </ul>
+        <h3>3. 填空避坑指南</h3>
+        <p><strong>描述要"具体"：</strong></p>
+        <p><span class="tip-bad">❌</span> 填空：<code>[蓝色]</code></p>
+        <p><span class="tip-good">✅</span> 填空：<code>[磨砂深海蓝，金属质感]</code></p>
+        <p><strong>身份要"明确"：</strong>如果提示词里没写，你可以手动加上：</p>
+        <p><code>"请作为一名有10年经验的[紧固件]行业业务员，帮我处理……"</code></p>
+        <p><strong>图片处理必做：</strong>所有的图片修改需求，必须<strong>先上传原图给 AI，再粘贴提示词</strong>。</p>
+        <h3>4. 如果 AI 没听懂（急救包）</h3>
+        <p>如果 AI 给的结果不对，直接发送以下指令"调教"它：</p>
+        <ul>
+          <li><strong>太长了？</strong> —— <code>"请精简到 100 字以内，只留核心信息。"</code></li>
+          <li><strong>太死板？</strong> —— <code>"语气再口语化一点，像是在展会现场聊天。"</code></li>
+          <li><strong>格式乱？</strong> —— <code>"请用表格形式整理出来。"</code></li>
+          <li><strong>没搜到？</strong> ——（针对 Perplexity）<code>"请尝试用英文搜索，再翻译成中文告诉我。"</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ===== 顶栏时间（抄8888） ===== */
+(function(){
+  var d = new Date();
+  var weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
+  document.getElementById('hero-date').textContent = weekdays[d.getDay()] + ' · ' +
+    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+})();
+
+/* ===== 配置 ===== */
+var CATS = ["全部","图像-生图","图像-修图","调研","通用","开发信"];
+var ICONS = {"全部":"📂","图像-生图":"🎨","图像-修图":"✏️","调研":"🔍","通用":"⚡","开发信":"📧"};
+var TYPE_MAP = {"图像-生图":"t-image-gen","图像-修图":"t-image-edit","调研":"t-research","通用":"t-general","开发信":"t-email","需求":"t-demand"};
+var CAT_ICONS = {"图像-生图":"🎨","图像-修图":"✏️","调研":"🔍","通用":"⚡","开发信":"📧","需求":"💡"};
+
+var all=[], cur="全部", q="", sortBy="date", page=1, perPage=9, demC=false, tt;
+
+/* ===== Modal ===== */
+function openModal(id){document.getElementById(id).classList.add("show");}
+function closeModal(id){document.getElementById(id).classList.remove("show");}
+function showHelp(){openModal("modalHelp");}
+document.querySelectorAll(".modal-overlay").forEach(function(el){
+  el.addEventListener("click",function(e){if(e.target===el)el.classList.remove("show");});
+});
+
+function toast(msg,type,ms){
+  ms=ms||2200; type=type||"";
+  var el=document.getElementById("toast");
+  el.textContent=msg;
+  el.className="show"+(type?" toast-"+type:"");
+  clearTimeout(tt);
+  tt=setTimeout(function(){el.className="";},ms);
+}
+
+async function api(url,opts){
+  opts=opts||{};
+  var r=await fetch(url,opts);
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+/* ===== 需求折叠 ===== */
+document.getElementById("demandToggleBtn").onclick=function(){
+  demC=!demC;
+  document.getElementById("demandBody").classList.toggle("collapsed",demC);
+  document.getElementById("demandTogIcon").classList.toggle("open",!demC);
+};
+
+/* ===== 添加按钮 ===== */
+document.getElementById("btnAddPrompt").onclick=function(){
+  document.getElementById("fp-title").value="";
+  document.getElementById("fp-content").value="";
+  document.getElementById("fp-cat").value="通用";
+  openModal("modalAddPrompt");
+};
+document.getElementById("btnAddDemand").onclick=function(){
+  document.getElementById("fd-title").value="";
+  document.getElementById("fd-content").value="";
+  openModal("modalAddDemand");
+};
+
+/* ===== 排序 ===== */
+document.getElementById("sortSelect").onchange=function(e){
+  sortBy=e.target.value; page=1; render();
+};
+
+/* ===== 分类标签 ===== */
+function renderCatTabs(){
+  var tabs=document.getElementById("catTabs");
+  var cnt={};
+  CATS.forEach(function(c){cnt[c]=0;});
+  var promptAll=all.filter(function(p){return p.category!=="需求";});
+  promptAll.forEach(function(p){cnt["全部"]++;cnt[p.category]=(cnt[p.category]||0)+1;});
+  tabs.innerHTML="";
+  CATS.forEach(function(cat){
+    var btn=document.createElement("button");
+    btn.className="cat-tab"+(cur===cat?" active":"");
+    btn.innerHTML='<span>'+ICONS[cat]+'</span><span>'+esc(cat)+'</span><span class="cat-count">'+(cnt[cat]||0)+'</span>';
+    btn.onclick=function(){cur=cat;page=1;renderCatTabs();render();renderStats();};
+    tabs.appendChild(btn);
+  });
+}
+
+function renderStats(){
+  var tips=all.filter(function(p){return p.category!=="需求";}).length;
+  var likes=all.reduce(function(s,p){return s+p.likes;},0);
+  var dem=all.filter(function(p){return p.category==="需求";}).length;
+  document.getElementById("hd-total").textContent=tips;
+  document.getElementById("hd-likes").textContent=likes;
+  document.getElementById("hd-demands").textContent=dem;
+  document.getElementById("tb-count").textContent=getFiltered().length+" 条";
+}
+
+function getFiltered(){
+  return all.filter(function(p){
+    if(p.category==="需求")return false;
+    if(cur!=="全部"&&p.category!==cur)return false;
+    if(q){var l=q.toLowerCase();if(!p.title.toLowerCase().includes(l)&&!p.content.toLowerCase().includes(l))return false;}
+    return true;
+  });
+}
+
+function sortList(arr){
+  if(sortBy==="likes") return arr.slice().sort(function(a,b){return b.likes-a.likes||b.id-a.id;});
+  return arr.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at)||b.id-a.id;});
+}
+
+/* ===== 卡片渲染（8888风格） ===== */
+function render(){
+  var g=document.getElementById("promptGrid");
+  var f=getFiltered();
+  var sorted=sortList(f);
+  document.getElementById("tb-count").textContent=sorted.length+" 条";
+  if(!sorted.length){
+    g.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><p>没有匹配的提示词</p></div>';
+    document.getElementById("pagination").innerHTML="";
+    return;
+  }
+  var total=Math.ceil(sorted.length/perPage);
+  var start=(page-1)*perPage;
+  var paged=sorted.slice(start,start+perPage);
+  g.innerHTML="";
+  paged.forEach(function(p,i){
+    var typeClass=TYPE_MAP[p.category]||"t-general";
+    var delay=((i+1)*0.06).toFixed(2);
+    var c=document.createElement("div");
+    c.className="card "+typeClass+" fade-up";
+    c.style.animationDelay=delay+"s";
+    var icon=CAT_ICONS[p.category]||"⚡";
+    c.innerHTML=
+      '<div class="card-top">'+
+        '<div class="card-icon">'+icon+'</div>'+
+        '<div class="card-title-row">'+
+          '<span class="card-name" title="'+esc(p.title)+'">'+esc(p.title)+'</span>'+
+          '<span class="card-bulb">💡</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card-content" id="pc-'+p.id+'">'+esc(p.content)+'</div>'+
+      '<span class="expand-link" id="pe-'+p.id+'" onclick="te('+p.id+')">展开全文 ▼</span>'+
+      '<div class="card-footer">'+
+        '<span class="card-date">'+p.created_at.slice(0,10)+'</span>'+
+        '<button class="card-btn btn-copy" onclick="cp('+p.id+',this)">📋 复制</button>'+
+        '<button class="card-btn btn-like" onclick="lk('+p.id+',this)">👍 <strong>'+p.likes+'</strong></button>'+
+        '<button class="card-btn btn-edit" onclick="startEdit('+p.id+')">✏️</button>'+
+        '<button class="card-btn btn-del" onclick="dl('+p.id+')">🗑</button>'+
+      '</div>';
+    g.appendChild(c);
+    requestAnimationFrame(function(){
+      var el=document.getElementById("pc-"+p.id),ex=document.getElementById("pe-"+p.id);
+      if(el&&ex&&el.scrollHeight<=el.clientHeight+2)ex.style.display="none";
+    });
+  });
+  // 分页
+  var pg=document.getElementById("pagination");
+  if(total<=1){pg.innerHTML="";return;}
+  pg.innerHTML='<button class="pg-btn" onclick="goPage('+(page-1)+')" '+(page===1?'disabled':'')+'>上一页</button>'+
+    '<span class="pg-info">第 '+page+' / '+total+' 页</span>'+
+    '<button class="pg-btn" onclick="goPage('+(page+1)+')" '+(page===total?'disabled':'')+'>下一页</button>';
+}
+
+function goPage(p){
+  var f=getFiltered();
+  var total=Math.ceil(f.length/perPage);
+  if(p<1||p>total)return;
+  page=p; render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function te(id){
+  var el=document.getElementById("pc-"+id),ex=document.getElementById("pe-"+id);
+  if(!el||!ex)return;
+  var e=el.classList.toggle("expanded");
+  ex.textContent=e?"收起 ▲":"展开全文 ▼";
+}
+
+function cp(id,btn){
+  var p=all.find(function(x){return x.id===id;});
+  if(!p)return;
+  var ok=function(){btn.textContent="✓ 已复制";btn.classList.add("copied");toast("已复制 ✓","success");setTimeout(function(){btn.textContent="📋 复制";btn.classList.remove("copied");},2000);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(p.content).then(ok).catch(function(){var t=document.createElement("textarea");t.value=p.content;t.style.cssText="position:fixed;top:-999px;left:-999px";document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);ok();});
+  }else{var t=document.createElement("textarea");t.value=p.content;t.style.cssText="position:fixed;top:-999px;left:-999px";document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);ok();}
+}
+
+async function lk(id,btn){
+  btn.disabled=true;
+  try{
+    var u=await api("/api/prompts/"+id+"/like",{method:"POST"});
+    var i=all.findIndex(function(x){return x.id===id;});
+    if(i>=0)all[i].likes=u.likes;
+    btn.querySelector("strong").textContent=u.likes;
+    btn.classList.add("liked");
+    renderCatTabs(); render(); renderStats();
+    if(u.category==="需求")renderDemands();
+    toast("点赞成功！","success");
+  }catch(e){
+    var msg=e.message||String(e);
+    toast(msg.includes("一天之内")?"一天之内一次哟":"点赞失败","warn");
+  }finally{btn.disabled=false;}
+}
+
+async function dlk(id,btn){
+  btn.disabled=true;
+  try{
+    var u=await api("/api/prompts/"+id+"/like",{method:"POST"});
+    var i=demandAll.findIndex(function(x){return x.id===id;});
+    if(i>=0)demandAll[i].likes=u.likes;
+    btn.parentElement.querySelector(".vote-count").textContent=u.likes+" 票";
+    toast("投票成功！","success");
+  }catch(e){btn.disabled=false;toast("投票失败","error");}
+}
+
+/* ===== 编辑 ===== */
+function startEdit(id){
+  var p=all.find(function(x){return x.id===id;});
+  if(!p)return;
+  document.getElementById("edit-id").value=id;
+  document.getElementById("edit-title").value=p.title;
+  document.getElementById("edit-cat").value=p.category;
+  document.getElementById("edit-content").value=p.content;
+  document.getElementById("edit-password").value="";
+  openModal("modalEdit");
+}
+
+document.getElementById("editForm").onsubmit=async function(e){
+  e.preventDefault();
+  var id=document.getElementById("edit-id").value;
+  var ti=document.getElementById("edit-title").value.trim();
+  var co=document.getElementById("edit-content").value.trim();
+  var ca=document.getElementById("edit-cat").value;
+  var pw=document.getElementById("edit-password").value;
+  if(!ti||!co){toast("标题和内容不能为空","error");return;}
+  var fd=new FormData();fd.append("title",ti);fd.append("content",co);fd.append("category",ca);fd.append("password",pw);
+  try{
+    var u=await api("/api/prompts/"+id,{method:"PUT",body:fd});
+    var i=all.findIndex(function(x){return x.id==id;});
+    if(i>=0)all[i]=u;
+    closeModal("modalEdit");toast("修改成功 ✓","success");
+    renderCatTabs(); render(); renderStats(); renderDemands();
+  }catch(err){toast(err.message.includes("密码")?"密码错误":"修改失败","error");}
+};
+
+/* ===== 删除 ===== */
+var delTargetId=null;
+function dl(id){delTargetId=id;document.getElementById("del-password").value="";openModal("modalDel");}
+document.getElementById("btnConfirmDel").onclick=async function(){
+  var pw=document.getElementById("del-password").value;
+  closeModal("modalDel");
+  try{
+    await api("/api/prompts/"+delTargetId+"?password="+encodeURIComponent(pw),{method:"DELETE"});
+    all=all.filter(function(p){return p.id!==delTargetId;});
+    renderCatTabs(); render(); renderStats(); renderDemands(); toast("已删除");
+  }catch(e){toast(e.message.includes("密码")?"密码错误":"删除失败","error");}
+};
+
+/* ===== 需求箱 ===== */
+var demandAll=[],demandPage=1,demandPerPage=6,demandMaxPages=3;
+async function renderDemands(retry){
+  retry=retry||0;
+  var row=document.getElementById("demandRow"),bad=document.getElementById("demandBadge"),pager=document.getElementById("demandPager");
+  try{
+    demandAll=await api("/api/demands");
+    bad.textContent=demandAll.length+" 条";
+    if(!demandAll.length){row.innerHTML='<div class="loading" style="color:var(--sub)">暂无需求，快来第一个提！</div>';pager.style.display="none";return;}
+    demandPage=1; renderDemandPage();
+  }catch(e){
+    if(retry<3){setTimeout(function(){renderDemands(retry+1);},300);}
+    else{row.innerHTML='<div class="loading">需求加载失败，<a href="javascript:location.reload()" style="color:var(--primary)">请刷新</a></div>';}
+  }
+}
+function renderDemandPage(){
+  var row=document.getElementById("demandRow"),pager=document.getElementById("demandPager");
+  var totalPages=Math.min(Math.ceil(demandAll.length/demandPerPage),demandMaxPages);
+  var start=(demandPage-1)*demandPerPage;
+  var pageItems=demandAll.slice(start,start+demandPerPage);
+  row.innerHTML="";
+  pageItems.forEach(function(x){
+    var c=document.createElement("div");c.className="demand-card";
+    var rankNum=start+pageItems.indexOf(x)+1;
+    c.innerHTML='<div class="demand-rank"><span class="rank-num'+(rankNum<=3?" top3":"")+'">'+rankNum+'</span><span class="rank-title" title="'+esc(x.title)+'">'+esc(x.title)+'</span></div><div class="rank-content">'+esc(x.content)+'</div><div class="rank-vote"><button class="btn-vote" onclick="dlk('+x.id+',this)">👍</button><span class="vote-count">'+x.likes+' 票</span></div>';
+    row.appendChild(c);
+  });
+  pager.innerHTML="";pager.style.display=totalPages>1?"flex":"none";
+  for(var p=1;p<=totalPages;p++){
+    var btn=document.createElement("button");btn.textContent=p;if(p===demandPage)btn.classList.add("active");
+    btn.onclick=function(pp){return function(){demandPage=pp;renderDemandPage();};}(p);
+    pager.appendChild(btn);
+  }
+}
+
+/* ===== 提交提示词 ===== */
+document.getElementById("addPromptForm").onsubmit=async function(e){
+  e.preventDefault();
+  var ti=document.getElementById("fp-title").value.trim(),co=document.getElementById("fp-content").value.trim(),ca=document.getElementById("fp-cat").value;
+  if(!ti||!co){toast("标题和内容不能为空","error");return;}
+  var btn=document.getElementById("btnSubmitPrompt");btn.disabled=true;btn.textContent="提交中...";
+  try{
+    var fd=new FormData();fd.append("title",ti);fd.append("content",co);fd.append("category",ca);
+    var np=await api("/api/prompts",{method:"POST",body:fd});
+    all.unshift(np);closeModal("modalAddPrompt");
+    renderCatTabs(); render(); renderStats(); toast("提示词已添加 ✓","success");
+  }catch(err){toast("提交失败: "+err.message,"error");}finally{btn.disabled=false;btn.textContent="提交";}
+};
+
+/* ===== 提交需求 ===== */
+document.getElementById("addDemandForm").onsubmit=async function(e){
+  e.preventDefault();
+  var ti=document.getElementById("fd-title").value.trim(),co=document.getElementById("fd-content").value.trim();
+  if(!ti||!co){toast("需求标题和内容不能为空","error");return;}
+  var btn=document.getElementById("btnSubmitDemand");btn.disabled=true;btn.textContent="提交中...";
+  try{
+    var fd=new FormData();fd.append("title",ti);fd.append("content",co);fd.append("category","需求");
+    var np=await api("/api/prompts",{method:"POST",body:fd});
+    all.unshift(np);closeModal("modalAddDemand");
+    renderCatTabs(); render(); renderStats(); renderDemands(); toast("需求已提交 ✓","success");
+  }catch(err){toast("提交失败: "+err.message,"error");}finally{btn.disabled=false;btn.textContent="提交需求";}
+};
+
+/* ===== 搜索 ===== */
+document.getElementById("searchInput").oninput=function(e){q=e.target.value.trim();page=1;render();renderStats();};
+
+/* ===== 初始化 ===== */
+var dataLoaded=false;
+async function loadData(retry){
+  retry=retry||0;
+  try{
+    all=await api("/api/prompts");dataLoaded=true;
+    renderCatTabs(); render(); renderStats(); renderDemands();
+  }catch(e){
+    if(retry<3){setTimeout(function(){loadData(retry+1);},300);}
+    else if(!dataLoaded){document.getElementById("promptGrid").innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>数据加载失败，<a href="javascript:location.reload()" style="color:var(--primary)">请点击刷新</a></p></div>';}
+  }
+}
+loadData();
+</script>
+</body>
+</html>

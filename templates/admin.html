@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>后台管理 · Prompt Hub</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>"/>
+<style>
+:root{--primary:#4f6ef7;--primary-h:#6366f1;--bg:#f4f7fb;--card:#ffffff;--text:#0f172a;--sub:#64748b;--muted:#94a3b8;--hero-s:#0f172a;--hero-e:#1e293b;--border:#e8ecf2;--border2:#cbd5e1;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--sh:0 1px 3px rgba(0,0,0,0.04);--sh2:0 4px 20px rgba(0,0,0,0.08);--r:16px;--r2:10px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei","Segoe UI Emoji","Inter",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+
+.header{background:rgba(255,255,255,0.92);border-bottom:1px solid var(--border);padding:0 32px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header-inner{max-width:1200px;margin:0 auto;height:64px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+.header a{color:var(--sub);text-decoration:none;font-size:13px;font-weight:500;transition:color .15s}
+.header a:hover{color:var(--primary)}
+
+.container{max-width:1000px;margin:0 auto;padding:1.5rem}
+
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh}
+.login-box{background:var(--card);border-radius:var(--r);box-shadow:var(--sh2);padding:2rem;width:320px}
+.login-box h2{font-size:1.1rem;margin-bottom:1.5rem;text-align:center;color:var(--text)}
+.input-group{margin-bottom:1rem}
+.input-group label{display:block;font-size:.78rem;color:var(--sub);margin-bottom:.4rem;font-weight:600}
+.input-group input{width:100%;padding:.6rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.88rem;transition:border .15s}
+.input-group input:focus{outline:none;border-color:var(--primary)}
+.btn{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:.65rem 1.2rem;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--primary-h)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.full{width:100%}
+.btn.red{background:var(--red)}
+.btn.red:hover{background:#dc2626}
+.btn.green{background:var(--green)}
+.btn.green:hover{background:#059669}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--card);border-radius:var(--r);padding:1.25rem;border:1px solid var(--border);box-shadow:var(--sh)}
+.stat-card .label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stat-card .value{font-size:1.8rem;font-weight:800;color:var(--text);margin-top:.25rem}
+.stat-card .sub{font-size:.72rem;color:var(--sub);margin-top:.15rem}
+
+.section{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);margin-bottom:1rem;overflow:hidden}
+.section-h{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1rem;background:var(--hero-s);color:#fff}
+.section-h h2{font-size:.88rem;font-weight:700}
+.section-h button{background:rgba(255,255,255,.15);border:none;color:#fff;padding:.35rem .75rem;border-radius:6px;font-size:.75rem;cursor:pointer}
+.section-h button:hover{background:rgba(255,255,255,.25)}
+.section-body{padding:1rem}
+
+.danger-zone{border-color:#fca5a5}
+.danger-zone .section-h{background:var(--red)}
+
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:.6rem .75rem;text-align:left;border-bottom:1px solid var(--border);font-size:.82rem}
+.table th{background:var(--bg);color:var(--sub);font-weight:600;font-size:.72rem;text-transform:uppercase}
+.table tr:hover td{background:#fafafa}
+.table .actions{display:flex;gap:.4rem}
+.table .actions button{padding:.25rem .5rem;border:1px solid var(--border);border-radius:5px;background:transparent;cursor:pointer;font-size:.72rem}
+.table .actions .edit:hover{border-color:#93c5fd;color:var(--primary)}
+.table .actions .del:hover{border-color:#fca5a5;color:var(--red)}
+.table .badge{padding:.15rem .4rem;border-radius:4px;font-size:.62rem;font-weight:700}
+.table .bg-h{background:#eef2ff;color:#6366f1}
+.table .bg-x{background:#ecfeff;color:#06b6d4}
+.table .bg-y{background:#ecfdf5;color:#10b981}
+.table .bg-t{background:#eef2ff;color:#4f6ef7}
+.table .bg-e{background:#fffbeb;color:#f59e0b}
+.table .bg-q{background:#fef2f2;color:#ef4444}
+
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.modal-overlay.show{opacity:1;visibility:visible}
+.modal{background:var(--card);border-radius:var(--r);box-shadow:var(--sh2);width:90%;max-width:480px;transform:translateY(20px);transition:transform .2s}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1rem;background:var(--hero-s);color:#fff}
+.modal-h h3{font-size:.9rem;font-weight:700}
+.modal-close{background:transparent;border:none;color:rgba(255,255,255,.7);font-size:1.2rem;cursor:pointer}
+.modal-body{padding:1rem}
+.form-row{margin-bottom:1rem}
+.form-row label{display:block;font-size:.75rem;color:var(--sub);margin-bottom:.35rem;font-weight:600}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:.5rem .65rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:.82rem;transition:border .15s}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--primary)}
+.form-row textarea{resize:vertical;min-height:100px}
+.form-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem}
+
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--card);border:1px solid var(--border2);color:var(--text);padding:.6rem 1rem;border-radius:10px;font-size:.8rem;box-shadow:var(--sh2);opacity:0;transform:translateY(8px);transition:all .2s;z-index:9999;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.success{border-color:#86efac}
+#toast.error{border-color:#fca5a5}
+
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<div class="header"><div class="header-inner">
+  <h1>🛠️ Prompt Hub 后台管理</h1>
+  <a href="/">← 返回前台</a>
+</div></div>
+
+<div class="container" id="app">
+  <!-- 登录 -->
+  <div class="login-wrap" id="loginPanel">
+    <div class="login-box">
+      <h2>🔐 管理登录</h2>
+      <div class="input-group">
+        <label>管理密码</label>
+        <input type="password" id="pwd" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="btn full" onclick="doLogin()">登录</button>
+    </div>
+  </div>
+
+  <!-- 管理面板 -->
+  <div id="adminPanel" class="hidden">
+    <div class="stats">
+      <div class="stat-card"><div class="label">提示词总数</div><div class="value" id="s-total">-</div></div>
+      <div class="stat-card"><div class="label">总点赞数</div><div class="value" id="s-likes">-</div></div>
+      <div class="stat-card"><div class="label">需求数</div><div class="value" id="s-demands">-</div></div>
+      <div class="stat-card"><div class="label">分类数</div><div class="value" id="s-cats">-</div></div>
+    </div>
+
+    <!-- 提示词列表 -->
+    <div class="section">
+      <div class="section-h">
+        <h2>📝 提示词管理</h2>
+        <button onclick="showAddModal()">+ 添加提示词</button>
+      </div>
+      <div class="section-body">
+        <table class="table">
+          <thead><tr><th>ID</th><th>标题</th><th>分类</th><th>点赞</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="promptTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 点赞记录 -->
+    <div class="section">
+      <div class="section-h">
+        <h2>👍 点赞记录</h2>
+        <button onclick="loadLikeRecords()">🔄 刷新</button>
+      </div>
+      <div class="section-body">
+        <table class="table">
+          <thead><tr><th>ID</th><th>提示词</th><th>分类</th><th>IP地址</th><th>点赞时间</th></tr></thead>
+          <tbody id="likeTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 危险操作 -->
+    <div class="section danger-zone">
+      <div class="section-h"><h2>⚠️ 危险操作</h2></div>
+      <div class="section-body">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <button class="btn" onclick="resetLikes()">🔄 清零所有点赞</button>
+          <button class="btn red" onclick="clearAll()">🗑️ 清空所有数据</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 编辑/添加弹窗 -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-h"><h3 id="modalTitle">编辑提示词</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id"/>
+      <div class="form-row">
+        <label>标题</label>
+        <input type="text" id="edit-title" placeholder="简短描述（不超过60字）" maxlength="60"/>
+      </div>
+      <div class="form-row">
+        <label>分类</label>
+        <select id="edit-cat">
+          <option value="图像-生图">🎨 图像-生图</option>
+          <option value="图像-修图">✏️ 图像-修图</option>
+          <option value="调研">🔍 调研</option>
+          <option value="通用">⚡ 通用</option>
+          <option value="开发信">📧 开发信</option>
+          <option value="需求">💡 需求</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>内容</label>
+        <textarea id="edit-content" placeholder="提示词内容..."></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn" style="background:#64748b" onclick="closeModal()">取消</button>
+        <button class="btn green" id="btnSave" onclick="savePrompt()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var pw="";
+var prompts=[];
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+function toast(msg,type){
+  var el=$("toast");
+  el.textContent=msg;
+  el.className="show"+(type?" "+type:"");
+  setTimeout(function(){el.className="";},2000);
+}
+
+async function api(url,opts){
+  opts=opts||{};
+  var r=await fetch(url,opts);
+  if(!r.ok){
+    var err=await r.text();
+    throw new Error(err);
+  }
+  return r.json();
+}
+
+async function doLogin(){
+  var p=$("pwd").value;
+  if(!p){toast("请输入密码","error");return;}
+  try{
+    var d=await api("/api/admin/stats?password="+encodeURIComponent(p));
+    pw=p;
+    $("loginPanel").classList.add("hidden");
+    $("adminPanel").classList.remove("hidden");
+    loadStats(d);
+    loadPrompts();
+    loadLikeRecords();
+  }catch(e){
+    toast("密码错误","error");
+  }
+}
+
+function loadStats(d){
+  $("s-total").textContent=d.total;
+  $("s-likes").textContent=d.total_likes;
+  $("s-demands").textContent=d.demands;
+  $("s-cats").textContent=d.by_cat.length;
+}
+
+async function loadPrompts(){
+  try{
+    prompts=await api("/api/prompts");
+    renderTable();
+  }catch(e){
+    toast("加载失败","error");
+  }
+}
+
+async function loadLikeRecords(){
+  try{
+    var records=await api("/api/admin/like-records?password="+encodeURIComponent(pw));
+    var t=$("likeTable");
+    if(!records.length){
+      t.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1rem">暂无记录</td></tr>';
+      return;
+    }
+    t.innerHTML=records.map(function(r){
+      var m={"图像-生图":"bg-h","图像-修图":"bg-x","调研":"bg-y","通用":"bg-t","开发信":"bg-e","需求":"bg-q"}[r.category]||"bg-t";
+      return '<tr><td>'+r.id+'</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(r.prompt_title)+'">'+esc(r.prompt_title)+'</td><td><span class="badge '+m+'">'+esc(r.category)+'</span></td><td style="font-family:monospace">'+esc(r.ip)+'</td><td>'+r.liked_at.slice(0,19)+'</td></tr>';
+    }).join("");
+  }catch(e){
+    toast("加载记录失败","error");
+  }
+}
+
+function renderTable(){
+  var t=$("promptTable");
+  if(!prompts.length){
+    t.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">暂无数据</td></tr>';
+    return;
+  }
+  t.innerHTML=prompts.map(function(p){
+    var m={"图像-生图":"bg-h","图像-修图":"bg-x","调研":"bg-y","通用":"bg-t","开发信":"bg-e","需求":"bg-q"}[p.category]||"bg-t";
+    return '<tr><td>'+p.id+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(p.content)+'">'+esc(p.title)+'</td><td><span class="badge '+m+'">'+esc(p.category)+'</span></td><td>'+p.likes+'</td><td>'+p.created_at.slice(0,10)+'</td><td class="actions"><button class="edit" onclick="showEditModal('+p.id+')">✏️</button><button class="del" onclick="delPrompt('+p.id+')">🗑️</button></td></tr>';
+  }).join("");
+}
+
+function showAddModal(){
+  $("modalTitle").textContent="添加提示词";
+  $("edit-id").value="";
+  $("edit-title").value="";
+  $("edit-cat").value="通用";
+  $("edit-content").value="";
+  $("editModal").classList.add("show");
+}
+
+function showEditModal(id){
+  var p=prompts.find(function(x){return x.id===id;});
+  if(!p)return;
+  $("modalTitle").textContent="编辑提示词";
+  $("edit-id").value=id;
+  $("edit-title").value=p.title;
+  $("edit-cat").value=p.category;
+  $("edit-content").value=p.content;
+  $("editModal").classList.add("show");
+}
+
+function closeModal(){
+  $("editModal").classList.remove("show");
+}
+
+async function savePrompt(){
+  var id=$("edit-id").value;
+  var ti=$("edit-title").value.trim();
+  var co=$("edit-content").value.trim();
+  var ca=$("edit-cat").value;
+  if(!ti||!co){toast("标题和内容不能为空","error");return;}
+  
+  var fd=new FormData();
+  fd.append("title",ti);
+  fd.append("content",co);
+  fd.append("category",ca);
+  fd.append("password",pw);
+  
+  try{
+    if(id){
+      await api("/api/prompts/"+id,{method:"PUT",body:fd});
+      toast("修改成功","success");
+    }else{
+      await api("/api/prompts",{method:"POST",body:fd});
+      toast("添加成功","success");
+    }
+    closeModal();
+    await loadPrompts();
+    var d=await api("/api/admin/stats?password="+encodeURIComponent(pw));
+    loadStats(d);
+  }catch(e){
+    toast("保存失败: "+e.message,"error");
+  }
+}
+
+async function delPrompt(id){
+  if(!confirm("确定要删除这条提示词吗？"))return;
+  try{
+    await api("/api/prompts/"+id+"?password="+encodeURIComponent(pw),{method:"DELETE"});
+    toast("已删除","success");
+    await loadPrompts();
+    var d=await api("/api/admin/stats?password="+encodeURIComponent(pw));
+    loadStats(d);
+  }catch(e){
+    toast("删除失败","error");
+  }
+}
+
+async function resetLikes(){
+  if(!confirm("确定要清零所有点赞数吗？"))return;
+  try{
+    await api("/api/admin/reset-likes?password="+encodeURIComponent(pw),{method:"POST"});
+    toast("已清零","success");
+    await loadPrompts();
+    var d=await api("/api/admin/stats?password="+encodeURIComponent(pw));
+    loadStats(d);
+  }catch(e){
+    toast("操作失败","error");
+  }
+}
+
+async function clearAll(){
+  if(!confirm("⚠️ 危险！确定要清空所有数据吗？此操作不可恢复！"))return;
+  if(!confirm("再次确认：所有提示词和点赞记录都将被删除！"))return;
+  try{
+    await api("/api/admin/clear-all?password="+encodeURIComponent(pw),{method:"POST"});
+    toast("已清空","success");
+    await loadPrompts();
+    var d=await api("/api/admin/stats?password="+encodeURIComponent(pw));
+    loadStats(d);
+  }catch(e){
+    toast("操作失败","error");
+  }
+}
+
+// 点击遮罩关闭
+document.querySelectorAll(".modal-overlay").forEach(function(el){
+  el.addEventListener("click",function(e){if(e.target===el)el.classList.remove("show");});
+});
+</script>
+</body>
+</html>
