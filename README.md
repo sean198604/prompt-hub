@@ -18,7 +18,7 @@ docker compose up -d --build
 ```
 
 ## 访问地址
-- 局域网：http://192.168.1.246:7000/
+- 本地：http://localhost:7000/；局域网部署请替换为实际服务器地址。
 - 本机：http://localhost:7000/
 
 ## 运维操作
