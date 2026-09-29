@@ -1,5 +1,3 @@
-<p align="center"><img src="assets/readme-cover.png" alt="Prompt Hub project cover" width="100%" /></p>
-
 # 企业提示词库 · Prompt Hub
 
 ## 目录结构
